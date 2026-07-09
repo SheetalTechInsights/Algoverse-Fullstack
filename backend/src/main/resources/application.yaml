@@ -1,19 +1,18 @@
 spring:
   datasource:
-    url: jdbc:postgresql://dpg-d7ds37nlk1mc73evi9sg-a.virginia-postgres.render.com:5432/algoverse
-    username: algoverse_user
-    password: t5dPpWYywNr7mkVYY620Vtwldwk5llsR
+    url: jdbc:mysql://localhost:3306/algoverse
+    username: root
+    password: passwordm
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
 
 server:
-  port: ${PORT:8080}
+  port: 8080
 
 logging:
   level:
-    org:
-      hibernate:
-        SQL: debug
+    org.hibernate.SQL: debug
