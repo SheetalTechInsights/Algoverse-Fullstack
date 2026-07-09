@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PatternCard from "../components/PatternCard";
+import { API_BASE_URL } from "../config";
 
 export default function Home() {
   const [patterns, setPatterns] = useState([]);
@@ -11,14 +12,13 @@ export default function Home() {
   const token = localStorage.getItem("token");
   const username = localStorage.getItem("username");
 
-  // Fetch patterns ONLY if logged in
   useEffect(() => {
     if (!token) {
       setLoading(false);
       return;
     }
 
-    fetch("http://localhost:8080/api/patterns", {
+    fetch(`${API_BASE_URL}/api/patterns`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -34,7 +34,6 @@ export default function Home() {
       });
   }, [token]);
 
-  // Scroll to patterns
   useEffect(() => {
     if (location.hash === "#patterns") {
       setTimeout(() => {
@@ -49,7 +48,6 @@ export default function Home() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-16 space-y-24">
 
-      {/* Hero */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-600 
                       text-white rounded-3xl shadow-xl 
                       py-24 px-10 text-center">
@@ -58,13 +56,11 @@ export default function Home() {
           Master DSA Pattern by Pattern
         </h1>
 
-        
         <p className="text-lg opacity-90 max-w-2xl mx-auto mb-6">
           Structured learning for coding interviews.
           Learn → Understand → Implement.
         </p>
 
-        {/* 👇 Show username or CTA */}
         {token ? (
           <p className="text-lg font-semibold">
             Welcome, {username} 👋
@@ -76,7 +72,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* If NOT logged in → show landing content */}
       {!token ? (
         <div className="text-center space-y-6">
           <h2 className="text-3xl font-bold">Why Algoverse?</h2>
@@ -92,7 +87,6 @@ export default function Home() {
           </ul>
         </div>
       ) : (
-        /* Logged in → show patterns */
         <div id="patterns">
           <h2 className="text-3xl font-bold mb-10">
             Popular Patterns

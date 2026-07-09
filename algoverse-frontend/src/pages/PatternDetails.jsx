@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 
 export default function PatternDetails() {
   const { id } = useParams();
@@ -17,8 +18,7 @@ export default function PatternDetails() {
       return;
     }
 
-    // Fetch pattern
-    fetch(`http://localhost:8080/api/patterns/${id}`, {
+    fetch(`${API_BASE_URL}/api/patterns/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -26,8 +26,7 @@ export default function PatternDetails() {
       .then(res => res.json())
       .then(data => setPattern(data));
 
-    // Fetch problems
-    fetch(`http://localhost:8080/api/problems/pattern/${id}`, {
+    fetch(`${API_BASE_URL}/api/problems/pattern/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -51,16 +50,14 @@ export default function PatternDetails() {
     return "";
   };
 
-  
   const markSolved = async (problemId) => {
-    await fetch(`http://localhost:8080/api/problems/${problemId}/solve`, {
+    await fetch(`${API_BASE_URL}/api/problems/${problemId}/solve`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
 
-    // update UI instantly
     setProblems(prev =>
       prev.map(p =>
         p.id === problemId ? { ...p, status: "SOLVED" } : p
@@ -68,9 +65,8 @@ export default function PatternDetails() {
     );
   };
 
- 
   const markAttempted = async (problemId) => {
-    await fetch(`http://localhost:8080/api/problems/${problemId}/attempt`, {
+    await fetch(`${API_BASE_URL}/api/problems/${problemId}/attempt`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`
@@ -107,7 +103,6 @@ export default function PatternDetails() {
               className="bg-white p-8 rounded-2xl border shadow-sm flex justify-between items-start"
             >
 
-              {/* LEFT SIDE */}
               <div>
                 <Link to={`/pattern/${id}/${problem.id}`}>
                   <h3 className="font-semibold text-lg hover:underline">
@@ -119,7 +114,6 @@ export default function PatternDetails() {
                   {problem.description}
                 </p>
 
-                {/* STATUS */}
                 {problem.status === "SOLVED" && (
                   <p className="text-green-600 mt-2"> Solved</p>
                 )}
@@ -128,7 +122,6 @@ export default function PatternDetails() {
                   <p className="text-yellow-600 mt-2">⚡ Attempted</p>
                 )}
 
-                {/* BUTTONS */}
                 <div className="flex gap-3 mt-4">
                   <button
                     onClick={() => markSolved(problem.id)}
@@ -146,7 +139,6 @@ export default function PatternDetails() {
                 </div>
               </div>
 
-              {/* RIGHT SIDE */}
               <span className={`px-4 py-1 rounded-full text-sm ${getDifficultyBadge(problem.difficulty)}`}>
                 {problem.difficulty}
               </span>

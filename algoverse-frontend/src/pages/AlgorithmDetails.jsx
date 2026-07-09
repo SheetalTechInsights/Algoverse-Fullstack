@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
+import { API_BASE_URL } from "../config";
 
 export default function AlgorithmDetails() {
   const { problemId } = useParams();
@@ -13,20 +14,18 @@ export default function AlgorithmDetails() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // ✅ If not logged in → redirect
     if (!token) {
       navigate("/login");
       return;
     }
 
-    fetch(`http://localhost:8080/api/problems/${problemId}`, {
+    fetch(`${API_BASE_URL}/api/problems/${problemId}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     })
       .then((res) => {
         if (res.status === 401) {
-          // token invalid / expired
           localStorage.removeItem("token");
           localStorage.removeItem("username");
           navigate("/login");
@@ -53,7 +52,6 @@ export default function AlgorithmDetails() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-16 space-y-16">
 
-      {/* Problem Title */}
       <div>
         <h1 className="text-4xl font-bold">
           {problem.name}
@@ -63,7 +61,6 @@ export default function AlgorithmDetails() {
         </p>
       </div>
 
-      {/* Approach */}
       <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
         <h2 className="text-2xl font-bold mb-4">
           Approach
@@ -73,7 +70,6 @@ export default function AlgorithmDetails() {
         </p>
       </div>
 
-      {/* Pseudocode */}
       <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
         <h2 className="text-2xl font-bold mb-4">
           Pseudocode
@@ -85,7 +81,6 @@ export default function AlgorithmDetails() {
         </pre>
       </div>
 
-      {/* Code Editor */}
       <div>
         <h2 className="text-2xl font-bold mb-6">
           Implementation

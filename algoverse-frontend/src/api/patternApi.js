@@ -1,8 +1,7 @@
 import axios from "axios";
-
-const API_BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "./config"; // agar ye file bhi src root mein hai to "./config", warna adjust karo
 
 export const getPatterns = async () => {
-  const response = await axios.get(`${API_BASE_URL}/patterns`);
+  const response = await axios.get(`${API_BASE_URL}/api/patterns`);
   return response.data;
 };
