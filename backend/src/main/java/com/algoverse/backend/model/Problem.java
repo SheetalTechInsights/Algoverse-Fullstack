@@ -20,19 +20,15 @@ public class Problem {
 
     private String difficulty;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String approach;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String pseudoCode;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String starterCode;
 
