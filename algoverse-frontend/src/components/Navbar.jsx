@@ -8,13 +8,11 @@ export default function Navbar() {
   const [active, setActive] = useState("home");
   const [username, setUsername] = useState(null);
 
-  // ✅ Load username from localStorage
   useEffect(() => {
     const user = localStorage.getItem("username");
     setUsername(user);
-  }, [location]); // update when route changes
+  }, [location]);
 
-  // Detect route change
   useEffect(() => {
     if (location.pathname !== "/") {
       setActive("");
@@ -23,7 +21,6 @@ export default function Navbar() {
     }
   }, [location]);
 
-  // Detect scroll
   useEffect(() => {
     const handleScroll = () => {
       const patternsSection = document.getElementById("patterns");
@@ -44,7 +41,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Home click
   const handleHomeClick = () => {
     setActive("home");
 
@@ -58,7 +54,6 @@ export default function Navbar() {
     }
   };
 
-  // ✅ Logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
@@ -79,7 +74,6 @@ export default function Navbar() {
 
         <div className="space-x-8 font-medium flex items-center">
 
-          {/* HOME */}
           <button
             onClick={handleHomeClick}
             className={`transition ${
@@ -90,13 +84,14 @@ export default function Navbar() {
           >
             Home
           </button>
-        <Link
-  to="/dashboard"
-  className="text-gray-600 hover:text-emerald-600"
->
-  Dashboard
-</Link>
-          {/* PATTERNS */}
+
+          <Link
+            to="/dashboard"
+            className="text-gray-600 hover:text-emerald-600"
+          >
+            Dashboard
+          </Link>
+
           <button
             onClick={() => navigate("/#patterns")}
             className={`transition ${
@@ -108,7 +103,6 @@ export default function Navbar() {
             Patterns
           </button>
 
-          {/* ✅ AUTH SECTION */}
           {username ? (
             <div className="flex items-center space-x-4">
               <span className="text-emerald-600 font-semibold">
@@ -123,12 +117,21 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <Link
-              to="/login"
-              className="px-4 py-2 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition"
-            >
-              Login
-            </Link>
+            <div className="flex items-center space-x-3">
+              <Link
+                to="/signup"
+                className="text-gray-600 hover:text-emerald-600 font-medium"
+              >
+                Sign Up
+              </Link>
+
+              <Link
+                to="/login"
+                className="px-4 py-2 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition"
+              >
+                Login
+              </Link>
+            </div>
           )}
 
         </div>
