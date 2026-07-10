@@ -30,14 +30,16 @@ public class AuthService {
 
         User user = new User();
         user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole("ROLE_USER");
 
         userRepository.save(user);
 
         return "User registered successfully";
     }
 
-    //LOGIN (MOST IMPORTANT FIX HERE)
+    // LOGIN
     public Map<String, String> login(LoginRequest request) {
 
         User user = userRepository.findByUsername(request.getUsername())
@@ -47,7 +49,6 @@ public class AuthService {
             throw new RuntimeException("Invalid password");
         }
 
-        //  CRITICAL FIX (use USERNAME, not email)
         String token = jwtUtil.generateToken(user.getUsername());
 
         Map<String, String> response = new HashMap<>();

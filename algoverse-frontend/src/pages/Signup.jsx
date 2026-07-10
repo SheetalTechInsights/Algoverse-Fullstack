@@ -4,6 +4,7 @@ import { API_BASE_URL } from "../config";
 
 export default function Signup() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -18,6 +19,7 @@ export default function Signup() {
         },
         body: JSON.stringify({
           username,
+          email,
           password
         })
       });
@@ -46,6 +48,15 @@ export default function Signup() {
           className="w-full border p-2 rounded"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full border p-2 rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
 
