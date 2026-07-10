@@ -20,8 +20,8 @@ export default function Login() {
       });
 
       if (!res.ok) {
-        const err = await res.text();
-        alert("Login failed: " + err);
+        const err = await res.json();
+        alert("Login failed: " + (err.error || "Something went wrong"));
         return;
       }
 

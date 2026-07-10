@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 
 export default function Signup() {
@@ -28,8 +28,8 @@ export default function Signup() {
         alert("Signup successful ");
         navigate("/login");
       } else {
-        const err = await res.text();
-        alert("Signup failed: " + err);
+        const err = await res.json();
+        alert("Signup failed: " + (err.error || "Something went wrong"));
       }
     } catch (err) {
       console.error(err);
@@ -72,6 +72,13 @@ export default function Signup() {
         <button className="w-full bg-green-500 text-white py-2 rounded">
           Signup
         </button>
+
+        <p className="text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link to="/login" className="text-green-600 font-semibold hover:underline">
+            Login now
+          </Link>
+        </p>
       </form>
     </div>
   );
