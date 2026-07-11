@@ -1,7 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import Editor from "@monaco-editor/react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { API_BASE_URL } from "../config";
+
+// Monaco Editor ab tabhi load hoga jab actually zarurat ho (desktop pe)
+const Editor = lazy(() => import("@monaco-editor/react"));
 
 export default function AlgorithmDetails() {
   const { problemId } = useParams();
@@ -10,12 +12,16 @@ export default function AlgorithmDetails() {
   const [problem, setProblem] = useState(null);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 640 : false
+  );
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 640);
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -98,14 +104,22 @@ export default function AlgorithmDetails() {
               spellCheck={false}
             />
           ) : (
-            <Editor
-              height="350px"
-              defaultLanguage="javascript"
-              value={code}
-              onChange={(value) => setCode(value)}
-              theme="vs-dark"
-              options={{ fontSize: 13, minimap: { enabled: false } }}
-            />
+            <Suspense
+              fallback={
+                <div className="h-[350px] bg-gray-900 flex items-center justify-center text-gray-400 text-sm">
+                  Loading editor...
+                </div>
+              }
+            >
+              <Editor
+                height="350px"
+                defaultLanguage="javascript"
+                value={code}
+                onChange={(value) => setCode(value)}
+                theme="vs-dark"
+                options={{ fontSize: 13, minimap: { enabled: false } }}
+              />
+            </Suspense>
           )}
         </div>
       </div>
