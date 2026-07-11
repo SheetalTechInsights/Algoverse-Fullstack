@@ -10,8 +10,13 @@ export default function AlgorithmDetails() {
   const [problem, setProblem] = useState(null);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 640);
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -85,14 +90,23 @@ export default function AlgorithmDetails() {
         </h2>
 
         <div className="rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-          <Editor
-            height="350px"
-            defaultLanguage="javascript"
-            value={code}
-            onChange={(value) => setCode(value)}
-            theme="vs-dark"
-            options={{ fontSize: 13, minimap: { enabled: false } }}
-          />
+          {isMobile ? (
+            <textarea
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="w-full h-64 bg-gray-900 text-green-400 font-mono text-xs p-4 focus:outline-none resize-none"
+              spellCheck={false}
+            />
+          ) : (
+            <Editor
+              height="350px"
+              defaultLanguage="javascript"
+              value={code}
+              onChange={(value) => setCode(value)}
+              theme="vs-dark"
+              options={{ fontSize: 13, minimap: { enabled: false } }}
+            />
+          )}
         </div>
       </div>
 
