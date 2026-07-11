@@ -1,9 +1,25 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, Suspense, lazy } from "react";
+import { useEffect, useState } from "react";
+import CodeMirror from "@uiw/react-codemirror";
+import { java } from "@codemirror/lang-java";
+import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { cpp } from "@codemirror/lang-cpp";
 import { API_BASE_URL } from "../config";
 
-// Monaco Editor ab tabhi load hoga jab actually zarurat ho (desktop pe)
-const Editor = lazy(() => import("@monaco-editor/react"));
+const LANGUAGES = {
+  java: { label: "Java", extension: java(), pistonLang: "java" },
+  javascript: { label: "JavaScript", extension: javascript(), pistonLang: "javascript" },
+  python: { label: "Python", extension: python(), pistonLang: "python" },
+  cpp: { label: "C++", extension: cpp(), pistonLang: "cpp" },
+};
+
+const DEFAULT_SNIPPETS = {
+  java: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
+  javascript: `console.log("Hello, World!");`,
+  python: `print("Hello, World!")`,
+  cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}`,
+};
 
 export default function AlgorithmDetails() {
   const { problemId } = useParams();
@@ -11,18 +27,12 @@ export default function AlgorithmDetails() {
 
   const [problem, setProblem] = useState(null);
   const [code, setCode] = useState("");
+  const [language, setLanguage] = useState("java");
   const [loading, setLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth < 640 : false
-  );
+  const [output, setOutput] = useState("");
+  const [running, setRunning] = useState(false);
 
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -45,7 +55,8 @@ export default function AlgorithmDetails() {
       .then((data) => {
         if (data) {
           setProblem(data);
-          setCode(data.starterCode || "");
+          // Agar backend se starterCode aaya hai use karo, warna default Java snippet
+          setCode(data.starterCode || DEFAULT_SNIPPETS.java);
         }
         setLoading(false);
       })
@@ -54,6 +65,55 @@ export default function AlgorithmDetails() {
         setLoading(false);
       });
   }, [problemId, token, navigate]);
+
+  const handleLanguageChange = (e) => {
+    const newLang = e.target.value;
+    setLanguage(newLang);
+    setCode(DEFAULT_SNIPPETS[newLang]);
+    setOutput("");
+  };
+
+  const runCode = async () => {
+    setRunning(true);
+    setOutput("Running...");
+
+    try {
+      // Get the latest available version for the selected language
+      const runtimesRes = await fetch("https://emkc.org/api/v2/piston/runtimes");
+      const runtimes = await runtimesRes.json();
+      const runtime = runtimes.find(
+        (r) => r.language === LANGUAGES[language].pistonLang
+      );
+
+      const res = await fetch("https://emkc.org/api/v2/piston/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          language: LANGUAGES[language].pistonLang,
+          version: runtime ? runtime.version : "*",
+          files: [{ content: code }],
+        }),
+      });
+
+      const data = await res.json();
+
+      const stdout = data.run?.stdout || "";
+      const stderr = data.run?.stderr || "";
+      const compileError = data.compile?.stderr || "";
+
+      if (compileError) {
+        setOutput("Compilation Error:\n" + compileError);
+      } else if (stderr) {
+        setOutput("Runtime Error:\n" + stderr);
+      } else {
+        setOutput(stdout || "Code ran successfully (no output).");
+      }
+    } catch (err) {
+      setOutput("Error running code: " + err.message);
+    } finally {
+      setRunning(false);
+    }
+  };
 
   if (loading) return <div className="p-10 sm:p-20 text-center">Loading...</div>;
   if (!problem) return <div className="p-10 sm:p-20 text-center">Problem Not Found</div>;
@@ -91,36 +151,56 @@ export default function AlgorithmDetails() {
       </div>
 
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-          Implementation
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold">
+            Implementation
+          </h2>
+
+          <div className="flex items-center gap-3">
+            <select
+              value={language}
+              onChange={handleLanguageChange}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {Object.entries(LANGUAGES).map(([key, val]) => (
+                <option key={key} value={key}>
+                  {val.label}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={runCode}
+              disabled={running}
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 sm:px-5 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap"
+            >
+              {running ? "Running..." : "▶ Run"}
+            </button>
+          </div>
+        </div>
 
         <div className="rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-          {isMobile ? (
-            <textarea
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="w-full h-64 bg-gray-900 text-green-400 font-mono text-xs p-4 focus:outline-none resize-none"
-              spellCheck={false}
-            />
-          ) : (
-            <Suspense
-              fallback={
-                <div className="h-[350px] bg-gray-900 flex items-center justify-center text-gray-400 text-sm">
-                  Loading editor...
-                </div>
-              }
-            >
-              <Editor
-                height="350px"
-                defaultLanguage="javascript"
-                value={code}
-                onChange={(value) => setCode(value)}
-                theme="vs-dark"
-                options={{ fontSize: 13, minimap: { enabled: false } }}
-              />
-            </Suspense>
-          )}
+          <CodeMirror
+            value={code}
+            height="320px"
+            theme="dark"
+            extensions={[LANGUAGES[language].extension]}
+            onChange={(value) => setCode(value)}
+            basicSetup={{
+              lineNumbers: true,
+              foldGutter: false,
+            }}
+          />
+        </div>
+
+        {/* Output panel */}
+        <div className="mt-4 bg-gray-900 rounded-xl p-4 sm:p-5 min-h-[80px]">
+          <p className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">
+            Output
+          </p>
+          <pre className="text-green-400 text-xs sm:text-sm whitespace-pre-wrap font-mono">
+            {output || "Click 'Run' to execute your code"}
+          </pre>
         </div>
       </div>
 
