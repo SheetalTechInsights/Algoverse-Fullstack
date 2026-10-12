@@ -114,8 +114,8 @@ npm start
 
 ## 🌐 Live Demo
 
-- Frontend: *[add your Vercel link here]*
-- Backend: *[add your Railway link here]*
+- https://algoverse-fullstack-jvqc.vercel.app/
+  
 
 ## 📈 Future Improvements
 
